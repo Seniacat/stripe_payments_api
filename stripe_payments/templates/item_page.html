@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Buy cool new product</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+  </head>
+  <body>
+    <section>
+      <div class="product">
+        <div class="description">
+          <h1>{{ item.name }}</h1>
+          <p>{{ item.description }}</p>
+          <p>{{ item.get_display_price }}</p>
+        </div>
+      </div>
+      {% csrf_token %}
+      <button type="button" id="buy-button">Buy</button>
+      <script type="text/javascript">
+        var stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
+        var buyButton = document.getElementById('buy-button');
+          buyButton.addEventListener('click', function() {
+            fetch("{% url 'buy_item' item.id %}", {
+              method: "GET"
+            })
+            .then(function(response) {
+              return response.json()
+            })
+            .then(function(session) {
+              console.log(session)
+              stripe.redirectToCheckout({ sessionId: session.id });
+            }).then(function (result) {})
+          });
+      </script>
+  </body>
+</html>
+
