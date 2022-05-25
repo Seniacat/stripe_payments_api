@@ -12,6 +12,7 @@ from django.views.generic import TemplateView
 from .models import Item
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_version = "2020-08-27; orders_beta=v3;"
 
 
 class SuccessView(TemplateView):
