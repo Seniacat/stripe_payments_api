@@ -38,7 +38,8 @@ class OrderItemAdmin(admin.ModelAdmin):
     list_display = (
         'order',
         'item',
-        'quantity'
+        'quantity',
+        'get_total_item_price'
     )
     search_fields = ('order__customer__username',)
 
@@ -51,7 +52,6 @@ class OrderAdmin(admin.ModelAdmin):
         'date_completed',
         'status',
         'get_total_price',
-        
     )
     search_fields = (
         'customer__username',

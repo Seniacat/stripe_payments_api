@@ -1,4 +1,3 @@
-from locale import currency
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -13,10 +12,10 @@ class Item(models.Model):
         (EUR, 'eur'),
         (USD, 'usd')
     )
-    
+
     name = models.CharField(
         max_length=256,
-        verbose_name='Название продукта' 
+        verbose_name='Название продукта'
     )
     description = models.TextField(
         verbose_name='Описание продукта'
@@ -98,22 +97,22 @@ class Order(models.Model):
     )
     date_created = models.DateTimeField(
         auto_now_add=True,
-        null = True,
-        blank = True,
-        verbose_name='Дата создания'    
+        null=True,
+        blank=True,
+        verbose_name='Дата создания'
     )
     date_completed = models.DateTimeField(
-        null = True,
-        blank = True,
+        null=True,
+        blank=True,
         verbose_name='Дата исполнения'
     )
     status = models.CharField(
         max_length=3,
         choices=STATUS_CHOICES,
         default=OPEN,
-        verbose_name= 'Статус заказа',
+        verbose_name='Статус заказа',
     )
-    
+
     def get_total_price(self):
         total = 0
         for order_item in self.orderitems.all():
@@ -122,7 +121,7 @@ class Order(models.Model):
 
     def __str__(self):
         return f'{self.customer.username} - {self.id}'
-    
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(
@@ -167,9 +166,9 @@ class Discount(models.Model):
         verbose_name='Скидки'
     )
     date_end = models.DateTimeField(
-        null = True,
-        blank = True,
-        verbose_name='Срок окончания действия'    
+        null=True,
+        blank=True,
+        verbose_name='Срок окончания действия'
     )
     date_applied = models.DateTimeField(
         auto_now_add=True,
