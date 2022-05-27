@@ -70,7 +70,7 @@ echo DOMAIN=************ >> .env
 ```
 docker-compose up -d
 ```
-Запустить миграции, создать суперюзера, собрать статику и заполнить БД:
+Запустить миграции, создать суперюзера и собрать статику:
 ```
 docker-compose exec web python manage.py migrate
 
