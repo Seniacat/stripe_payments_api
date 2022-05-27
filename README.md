@@ -14,7 +14,8 @@
 - Works on Linux, Windows, macOS
 
 ## Описание проекта
-В проекте реализован Django + Stripe API бэкенд со следующим функционалом:
+Проект для работы с сервисом электронных платежей Stripe создан в рамках тестового задания для кандидатов-разработчиков.
+В проекте реализован бэкенд Django + Stripe API со следующим функционалом:
  - Django Модель Item с полями (name, description, price, currency) 
 - API с двумя методами:
 ```
@@ -26,7 +27,7 @@ GET /item/{id}
 ```
 c помощью которого можно получить простейшую HTML страницу, на которой будет информация о выбранном Item и кнопка Buy. По нажатию на кнопку Buy происходит запрос на /buy/{id}, получение session_id и далее редирект на Checkout форму stripe.redirectToCheckout(sessionId=session_id)
 
-Дополнительно реализованы Django-модели Order, в которой можно объединить несколько Item и сделать платёж в Stripe на содержимое Order c общей стоимостью всех Items и модель Discount.
+Дополнительно реализованы модель Order, в которой можно объединить несколько Item и сделать платёж в Stripe на содержимое Order c общей стоимостью всех Items и модель Discount.
 В модель Item добавлено поле currency для двух разных валют, и в зависимости от валюты выбранного товара предлагается оплата в соответствующей валюте.
 
 ## Запуск проекта в контейнерах Docker
@@ -72,11 +73,11 @@ docker-compose up -d
 ```
 Запустить миграции, создать суперюзера и собрать статику:
 ```
-docker-compose exec web python manage.py migrate
+docker-compose exec backend python manage.py migrate
 
-docker-compose exec web python manage.py createsuperuser
+docker-compose exec backend python manage.py createsuperuser
 
-docker-compose exec web python manage.py collectstatic --no-input 
+docker-compose exec backend python manage.py collectstatic --no-input 
 ```
 Если запуск приложения производится на удаленном сервере, внесите адрес хоста в файл настроек default.conf:
 ```
