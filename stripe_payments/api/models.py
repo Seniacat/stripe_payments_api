@@ -1,12 +1,18 @@
-from http.client import PROCESSING
-from tkinter.messagebox import CANCEL
+from locale import currency
 from django.contrib.auth import get_user_model
 from django.db import models
+
 
 User = get_user_model()
 
 
 class Item(models.Model):
+    EUR = 'eur'
+    USD = 'usd'
+    CURRENCY_CHOICES = (
+        (EUR, 'eur'),
+        (USD, 'usd')
+    )
     
     name = models.CharField(
         max_length=256,
@@ -19,7 +25,12 @@ class Item(models.Model):
         default=0,
         verbose_name='Цена'
     )
-    # currency = 
+    currency = models.CharField(
+        max_length=3,
+        choices=CURRENCY_CHOICES,
+        default='eur',
+        verbose_name='Валюта'
+    )
 
     def __str__(self) -> str:
         return self.name
@@ -28,19 +39,51 @@ class Item(models.Model):
         return "{0:.2f}".format(self.price / 100)
 
 
-class Discount(models.Model):
-    # coupon_id =  
-    pass
+class Coupon(models.Model):
+    ONCE = 'O'
+    REPEATED = 'R'
+    FOREVER = 'F'
+    DURATION_CHOICES = (
+        (ONCE, 'once'),
+        (REPEATED, 'repeated'),
+        (FOREVER, 'forever'),
+    )
+
+    amount_off = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Размер скидки'
+    )
+    currency = models.CharField(
+        max_length=3,
+        default='eur',
+        verbose_name='Валюта'
+    )
+    duration = models.CharField(
+        max_length=1,
+        choices=DURATION_CHOICES,
+        default=ONCE
+    )
+    duration_in_months = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Срок действия скидки'
+    )
+    percent_off = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Процент скидки'
+    )
 
 
 class Order(models.Model):
-    OPEN = 'OPN',
+    OPEN = 'OPN'
     SUBMITTED = 'SBM'
     PROCESSING = 'PRS'
     COMPLETE = "CMP"
     CANCELED = 'CNL'
 
-    CHOICES = (
+    STATUS_CHOICES = (
         (OPEN, 'open'),
         (SUBMITTED, 'submitted'),
         (PROCESSING, 'processing'),
@@ -50,13 +93,8 @@ class Order(models.Model):
 
     customer = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
-        verbose_name='Покупатель')
-    orderitems = models.ManyToManyField(
-        Item,
-        through='ItemsInOrder',
-        through_fields=('item', 'order'),
-        verbose_name='Товары в заказе'
+        on_delete=models.CASCADE,
+        verbose_name='Покупатель'
     )
     date_created = models.DateTimeField(
         auto_now_add=True,
@@ -70,32 +108,70 @@ class Order(models.Model):
         verbose_name='Дата исполнения'
     )
     status = models.CharField(
-        'Статус заказа',
         max_length=3,
-        choices=CHOICES,
-        default=OPEN
-    )
-    discounts = models.ManyToManyField(
-        Discount,
-        verbose_name='Скидки'
-    )
-    amount_total = models.PositiveIntegerField(
-        default=0,
-        verbose_name='Сумма'
+        choices=STATUS_CHOICES,
+        default=OPEN,
+        verbose_name= 'Статус заказа',
     )
     
+    def get_total_price(self):
+        total = 0
+        for order_item in self.orderitems.all():
+            total += order_item.get_total_item_price()
+        return total
 
-class ItemsInOrder(models.Model):
+    def __str__(self):
+        return f'{self.customer.username} - {self.id}'
+    
+
+class OrderItem(models.Model):
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
-        related_name='items_in_order',
+        related_name='orderitems',
         verbose_name='Заказ'
     )
-    items = models.ForeignKey(
+    item = models.ForeignKey(
         Item,
         on_delete=models.CASCADE,
         related_name='items_list',
         verbose_name='Товары'
     )
-    quantity = models.PositiveSmallIntegerField('Количество')
+    quantity = models.PositiveSmallIntegerField(
+        default=1,
+        verbose_name='Количество'
+    )
+
+    def get_total_item_price(self):
+        return self.quantity * self.item.price
+
+    def __str__(self):
+        return f"{self.quantity} of {self.item.name}"
+
+
+class Discount(models.Model):
+    coupon = models.ForeignKey(
+        Coupon,
+        on_delete=models.CASCADE,
+        verbose_name='Купон'
+    )
+    customer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Покупатель'
+    )
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name='discounts',
+        verbose_name='Скидки'
+    )
+    date_end = models.DateTimeField(
+        null = True,
+        blank = True,
+        verbose_name='Срок окончания действия'    
+    )
+    date_applied = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата использования купона'
+    )
