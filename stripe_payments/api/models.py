@@ -31,6 +31,10 @@ class Item(models.Model):
         verbose_name='Валюта'
     )
 
+    class Meta:
+        verbose_name = 'Продукт'
+        verbose_name_plural = 'Продукты'
+
     def __str__(self) -> str:
         return self.name
 
@@ -74,6 +78,10 @@ class Coupon(models.Model):
         verbose_name='Процент скидки'
     )
 
+    class Meta:
+        verbose_name = 'Купон'
+        verbose_name_plural = 'Купоны'
+
 
 class Order(models.Model):
     OPEN = 'OPN'
@@ -113,6 +121,10 @@ class Order(models.Model):
         verbose_name='Статус заказа',
     )
 
+    class Meta:
+        verbose_name = 'Заказ'
+        verbose_name_plural = 'Заказы'
+
     def get_total_price(self):
         total = 0
         for order_item in self.orderitems.all():
@@ -140,6 +152,10 @@ class OrderItem(models.Model):
         default=1,
         verbose_name='Количество'
     )
+
+    class Meta:
+        verbose_name = 'Позиции в заказе'
+        verbose_name_plural = 'Позиции в заказе'
 
     def get_total_item_price(self):
         return self.quantity * self.item.price
@@ -174,3 +190,7 @@ class Discount(models.Model):
         auto_now_add=True,
         verbose_name='Дата использования купона'
     )
+
+    class Meta:
+        verbose_name = 'Скидка'
+        verbose_name_plural = 'Скидки'

@@ -18,9 +18,11 @@ class DiscountAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'customer',
+        'coupon',
         'date_end',
         'date_applied'
     )
+    search_fields = ('coupon__id', 'customer__username')
 
 
 class ItemAdmin(admin.ModelAdmin):
@@ -34,6 +36,11 @@ class ItemAdmin(admin.ModelAdmin):
     search_fields = ('name', 'price')
 
 
+class OrderItemAdminInline(admin.TabularInline):
+    model = OrderItem
+    extra = 1
+
+
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = (
         'order',
@@ -45,13 +52,14 @@ class OrderItemAdmin(admin.ModelAdmin):
 
 
 class OrderAdmin(admin.ModelAdmin):
+    inlines = (OrderItemAdminInline,)
     list_display = (
         'id',
         'customer',
         'date_created',
         'date_completed',
         'status',
-        'get_total_price',
+        'get_total_price'
     )
     search_fields = (
         'customer__username',
